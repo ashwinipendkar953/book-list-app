@@ -1,8 +1,11 @@
 import { useDispatch } from "react-redux";
 import { deleteBook, fetchBooks } from "./bookSlice";
+import { useNavigate } from "react-router-dom";
 
 const BookList = ({ books }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   return (
     <div className="container">
       {books?.map((book) => {
@@ -17,16 +20,28 @@ const BookList = ({ books }) => {
               <p className="mb-0">Genre: {book?.genre}</p>
             </div>
 
-            <button
-              className="btn btn-danger "
-              onClick={() => {
-                dispatch(deleteBook(book?._id)).then(() => {
-                  dispatch(fetchBooks());
-                });
-              }}
-            >
-              Delete
-            </button>
+            <div className="d-flex gap-2">
+              <button
+                className="btn btn-success"
+                onClick={() =>
+                  navigate(`/books/${book?._id}`, {
+                    state: { bookData: book, isEdit: true },
+                  })
+                }
+              >
+                Edit
+              </button>
+              <button
+                className="btn btn-danger "
+                onClick={() => {
+                  dispatch(deleteBook(book?._id)).then(() => {
+                    dispatch(fetchBooks());
+                  });
+                }}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         );
       })}

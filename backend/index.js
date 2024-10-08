@@ -56,6 +56,27 @@ app.delete("/books/:id", async (req, res) => {
   }
 });
 
+app.post("/books/:id", async (req, res) => {
+  const bookId = req.params.id;
+  const bookDataToUpdate = req.body;
+
+  try {
+    const updatedBookData = await Books.findByIdAndUpdate(
+      bookId,
+      bookDataToUpdate,
+      {
+        new: true,
+      }
+    );
+    if (!updatedBookData) {
+      res.status(404).json({ error: "Book not found." });
+    }
+    res.status(201).json(updatedBookData);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

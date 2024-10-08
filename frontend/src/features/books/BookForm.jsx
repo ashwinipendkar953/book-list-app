@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { addBook, fetchBooks } from "./bookSlice";
+import { addBook, editBook, fetchBooks } from "./bookSlice";
+import { useLocation, useNavigate } from "react-router-dom";
 const INITIAL_FORM_DATA = {
   bookName: "",
   author: "",
@@ -10,6 +11,18 @@ const INITIAL_FORM_DATA = {
 const BookForm = () => {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const dispatch = useDispatch();
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const { bookData = {}, isEdit = false } = state || {};
+
+  useEffect(() => {
+    if (isEdit) {
+      setFormData(bookData);
+    } else {
+      setFormData(INITIAL_FORM_DATA);
+    }
+  }, [state]);
+
   const changeHandler = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -20,17 +33,22 @@ const BookForm = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    if (formData.bookName && formData.author && formData.genre) {
-      dispatch(addBook(formData)).then(() => {
-        dispatch(fetchBooks());
+    const newBookData = isEdit ? { _id: bookData?._id, ...formData } : formData;
+    if (isEdit) {
+      dispatch(editBook(newBookData)).then(() => {
+        navigate("/");
+      });
+    } else {
+      dispatch(addBook(newBookData)).then(() => {
+        navigate("/");
       });
     }
     setFormData(INITIAL_FORM_DATA);
   };
 
   return (
-    <div>
-      <h2>BookForm</h2>
+    <div className="container my-3">
+      <h1>{isEdit ? "Edit Book Form" : "Add Book Form"}</h1>
       <form action="" className="my-3" onSubmit={submitHandler}>
         <div className="mb-3">
           <label htmlFor="bookName" className="form-label">
@@ -75,7 +93,7 @@ const BookForm = () => {
           />
         </div>
         <button type="submit" className="btn btn-primary">
-          Submit
+          {isEdit ? "Edit" : "Submit"}
         </button>
       </form>
     </div>
